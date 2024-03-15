@@ -171,6 +171,12 @@ a:visited {
   display: none;
 }
 
+.form__btn__CRUD {
+  transform: translateX(35rem);
+  background-color: var(--color-dark--2);
+  border-radius: 9px;
+}
+
 .copyright {
   margin-top: auto;
   font-size: 1.3rem;
