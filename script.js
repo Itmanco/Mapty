@@ -128,8 +128,9 @@ class App {
     });
   }
 
-  _showForm(mapE) {
+  _showForm(mapE, clean = false) {
     this.#mapEvent = mapE;
+    this._cleanForm();
     form.classList.remove('hidden');
     inputDistance.focus();
     this.#CRUD = 'C';
@@ -137,12 +138,7 @@ class App {
 
   _hideForm() {
     // Empty inputs
-    inputDistance.value =
-      inputDuration.value =
-      inputCadence.value =
-      inputElevation.value =
-        '';
-
+    this._cleanForm();
     form.style.display = 'none';
     form.classList.add('hidden');
     setTimeout(() => (form.style.display = 'grid'), 1000);
@@ -153,13 +149,21 @@ class App {
     inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
   }
 
+  _cleanForm() {
+    inputDistance.value =
+      inputDuration.value =
+      inputCadence.value =
+      inputElevation.value =
+        '';
+  }
+
   _newWorkout(e) {
+    console.log(e);
     const validInputs = (...inputs) =>
       inputs.every(inp => Number.isFinite(inp));
     const allPositive = (...inputs) => inputs.every(inp => inp > 0);
 
     e.preventDefault();
-
     // Get data from form
     const type = inputType.value;
     const distance = +inputDistance.value;
@@ -313,8 +317,12 @@ class App {
       inputElevation.value = this.#crudworkout.elevation + '';
     }
   }
+
+  _removeWorkoutMenu() {
+    let btns = document.querySelectorAll('.form__btn__CRUD');
+    btns.forEach(btn => btn.remove());
+  }
   _moveToPopup(e) {
-    // BUGFIX: When we click on a workout before the map has loaded, we get an error. But there is an easy fix:
     if (!this.#map) return;
 
     const workoutEl = e.target.closest('.workout');
@@ -332,15 +340,12 @@ class App {
       },
     });
 
-    // using the public interface
-    // workout.click();
     // Show menu
-    let btns = document.querySelectorAll('.form__btn__CRUD');
-    btns.forEach(btn => btn.remove());
+    this._removeWorkoutMenu();
     const html = `<button type="button" class='form__btn__CRUD btn__Wdelete' data-id="D${workoutEl.dataset.id}">⛔</button>
  <button type="button" class='form__btn__CRUD btn__Wupdate' data-id="U${workoutEl.dataset.id}">⭕</button>`;
     e.target.closest('.workout').insertAdjacentHTML('beforebegin', html);
-    btns = document.querySelectorAll('.form__btn__CRUD');
+    const btns = document.querySelectorAll('.form__btn__CRUD');
     btns[0].addEventListener('click', this._deleteWorkoutByid.bind(this));
     btns[1].addEventListener('click', this._updateWorkoutByid.bind(this));
   }
@@ -369,11 +374,10 @@ class App {
     localStorage.removeItem('workouts');
     this._setLocalStorage();
 
+    this._removeWorkoutMenu();
     // First lets remove all the workouts
     let workos = document.querySelectorAll('.workout');
     workos.forEach(wo => wo.remove());
-    let btns = document.querySelectorAll('.form__btn__CRUD');
-    btns.forEach(btn => btn.remove());
     this._getLocalStorage();
   }
 }
