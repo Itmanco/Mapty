@@ -132,6 +132,7 @@ class App {
     this.#mapEvent = mapE;
     form.classList.remove('hidden');
     inputDistance.focus();
+    this.#CRUD = 'C';
   }
 
   _hideForm() {
@@ -367,8 +368,13 @@ class App {
   _refreshWorouts() {
     localStorage.removeItem('workouts');
     this._setLocalStorage();
+
+    // First lets remove all the workouts
+    let workos = document.querySelectorAll('.workout');
+    workos.forEach(wo => wo.remove());
+    let btns = document.querySelectorAll('.form__btn__CRUD');
+    btns.forEach(btn => btn.remove());
     this._getLocalStorage();
-    location.reload();
   }
 }
 
