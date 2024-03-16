@@ -285,6 +285,7 @@ class App {
 
     form.insertAdjacentHTML('afterend', html);
   }
+
   _deleteWorkoutByid(e) {
     console.log('_deleteWorkoutByid(e)->this', this);
     const idl = e.target.dataset.id.slice(1);
@@ -296,6 +297,7 @@ class App {
     }
     return this.#workouts;
   }
+
   _updateWorkoutByid(e) {
     const lid = e.target.dataset.id.slice(1);
     this.#crudworkout = this.#workouts.find(val => val.id === lid);
@@ -322,6 +324,16 @@ class App {
     let btns = document.querySelectorAll('.form__btn__CRUD');
     btns.forEach(btn => btn.remove());
   }
+  _addWorkoutMenu(workoutEl, e) {
+    this._removeWorkoutMenu();
+    const html = `<button type="button" class='form__btn__CRUD btn__Wdelete' data-id="D${workoutEl.dataset.id}">⛔</button>
+    <button type="button" class='form__btn__CRUD btn__Wupdate' data-id="U${workoutEl.dataset.id}">⭕</button>`;
+    e.target.closest('.workout').insertAdjacentHTML('beforebegin', html);
+    const btns = document.querySelectorAll('.form__btn__CRUD');
+    btns[0].addEventListener('click', this._deleteWorkoutByid.bind(this));
+    btns[1].addEventListener('click', this._updateWorkoutByid.bind(this));
+  }
+
   _moveToPopup(e) {
     if (!this.#map) return;
 
@@ -341,13 +353,7 @@ class App {
     });
 
     // Show menu
-    this._removeWorkoutMenu();
-    const html = `<button type="button" class='form__btn__CRUD btn__Wdelete' data-id="D${workoutEl.dataset.id}">⛔</button>
- <button type="button" class='form__btn__CRUD btn__Wupdate' data-id="U${workoutEl.dataset.id}">⭕</button>`;
-    e.target.closest('.workout').insertAdjacentHTML('beforebegin', html);
-    const btns = document.querySelectorAll('.form__btn__CRUD');
-    btns[0].addEventListener('click', this._deleteWorkoutByid.bind(this));
-    btns[1].addEventListener('click', this._updateWorkoutByid.bind(this));
+    this._addWorkoutMenu(workoutEl, e);
   }
 
   _setLocalStorage() {
@@ -370,6 +376,7 @@ class App {
     localStorage.removeItem('workouts');
     location.reload();
   }
+
   _refreshWorouts() {
     localStorage.removeItem('workouts');
     this._setLocalStorage();
