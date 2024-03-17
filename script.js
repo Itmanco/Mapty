@@ -212,10 +212,10 @@ class App {
     }
     if (this.#CRUD === 'U') {
       this.#CRUD === 'C';
+      const workoutToUpdate = this.#workouts.at(this.#crudworkout.index);
       if (type === 'running') {
         [lat, lng] = this.#crudworkout.coords;
         // reading current workout
-        const workoutToUpdate = this.#workouts.at(this.#crudworkout.index);
 
         const cadence = +inputCadence.value;
         console.log(
@@ -226,19 +226,31 @@ class App {
           duration,
           cadence
         );
+        if (type === this.#crudworkout.type) {
+          workoutToUpdate.distance = distance;
+          workoutToUpdate.duration = duration;
+          workoutToUpdate.cadence = cadence;
+        }
       }
       if (type === 'cycling') {
         const elevation = +inputElevation.value;
         console.log(
           'cycling',
-          this.#crudworkout.index,
+          workoutToUpdate.index,
           [lat, lng],
           distance,
           duration,
           elevation
         );
+        if (type === workoutToUpdate.type) {
+          workoutToUpdate.distance = distance;
+          workoutToUpdate.duration = duration;
+          workoutToUpdate.elevationGain = elevation;
+        }
       }
       console.log(this.#crudworkout);
+      console.log(this.#workouts);
+      this._refreshWorouts();
     }
 
     // Hide form + clear input fields
