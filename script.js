@@ -83,6 +83,7 @@ class App {
   #workouts = [];
   #CRUD = 'C';
   #crudworkout;
+  #markers = [];
   constructor() {
     // Get user's position
     this._getPosition();
@@ -158,7 +159,6 @@ class App {
   }
 
   _newWorkout(e) {
-    console.log(e);
     const validInputs = (...inputs) =>
       inputs.every(inp => Number.isFinite(inp));
     const allPositive = (...inputs) => inputs.every(inp => inp > 0);
@@ -232,7 +232,8 @@ class App {
   }
 
   _renderWorkoutMarker(workout) {
-    L.marker(workout.coords)
+    const womarker = L.marker(workout.coords);
+    womarker
       .addTo(this.#map)
       .bindPopup(
         L.popup({
@@ -247,6 +248,7 @@ class App {
         `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
       )
       .openPopup();
+    this.#markers.push({ id: '${workout.id}', marker: womarker });
   }
 
   _renderWorkout(workout) {
@@ -301,10 +303,26 @@ class App {
   }
 
   _deleteWorkoutByid(e) {
-    console.log('_deleteWorkoutByid(e)->this', this);
+    console.log('workouts->', this.#workouts);
+
     const idl = e.target.dataset.id.slice(1);
     if (confirm('Are you sure about delete it!') == true) {
-      this.#workouts = this.#workouts.filter(val => val.id != idl);
+      // this.#workouts = this.#workouts.filter(val => val.id != idl);
+      const workoutToDelete = this.#workouts.find(el => el.id === idl);
+      // workoutToDelete.marker.remove(this.#map);
+      const indexDelete = this.#workouts.findIndex(
+        el => el.id === workoutToDelete.id
+      );
+      this.#workouts.splice(indexDelete, 1);
+
+      console.log('workouts->', this.#workouts);
+      console.log('marker->', this.#markers);
+
+      this.#map.removeLayer(this.#markers.at(indexDelete).marker);
+      this.#markers.splice(indexDelete, 1);
+
+      console.log('marker->', this.#markers);
+
       this._refreshWorouts();
     } else {
       console.log('You canceled!');
@@ -340,8 +358,8 @@ class App {
   }
   _addWorkoutMenu(workoutEl, e) {
     this._removeWorkoutMenu();
-    const html = `<button type="button" class='form__btn__CRUD btn__Wdelete' data-id="D${workoutEl.dataset.id}">⛔</button>
-    <button type="button" class='form__btn__CRUD btn__Wupdate' data-id="U${workoutEl.dataset.id}">⭕</button>`;
+    const html = `<button title="Delete" type="button" class='form__btn__CRUD btn__Wdelete' data-id="D${workoutEl.dataset.id}">⛔</button>
+    <button title="Update" type="button" class='form__btn__CRUD btn__Wupdate' data-id="U${workoutEl.dataset.id}">⭕</button>`;
     e.target.closest('.workout').insertAdjacentHTML('beforebegin', html);
     const btns = document.querySelectorAll('.form__btn__CRUD');
     btns[0].addEventListener('click', this._deleteWorkoutByid.bind(this));
@@ -401,7 +419,18 @@ class App {
     // First lets remove all the workouts
     let workos = document.querySelectorAll('.workout');
     workos.forEach(wo => wo.remove());
+    //TODO: remove al markers from the map view
+
+    console.log('refresh->', this.#map.getContainer());
+    console.log(L.markerClusterGroup);
+    // this.#map
+    //   .getContainer()
+    //   .querySelectorAll('.leaflet-marker-icon')
+    //   .forEach(mark => mark.remove());
+
     this._getLocalStorage();
+
+    // <img src="https://unpkg.com/leaflet@1.6.0/dist/images/marker-icon.png" class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" alt="" tabindex="0" style="margin-left: -12px; margin-top: -41px; width: 25px; height: 41px; transform: translate3d(644px, -170px, 0px); z-index: -170;"></img>
   }
 }
 
