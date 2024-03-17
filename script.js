@@ -230,6 +230,8 @@ class App {
           workoutToUpdate.distance = distance;
           workoutToUpdate.duration = duration;
           workoutToUpdate.cadence = cadence;
+        } else {
+          // TODO: case 2 -> create a new cycling workout and replace it with the current workout
         }
       }
       if (type === 'cycling') {
@@ -246,6 +248,8 @@ class App {
           workoutToUpdate.distance = distance;
           workoutToUpdate.duration = duration;
           workoutToUpdate.elevationGain = elevation;
+        } else {
+          // TODO: case 3 -> create a new running workout and replace it with the current workout
         }
       }
       console.log(this.#crudworkout);
