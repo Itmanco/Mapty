@@ -174,9 +174,6 @@ class App {
 
         // Check if data is valid
         if (
-          // !Number.isFinite(distance) ||
-          // !Number.isFinite(duration) ||
-          // !Number.isFinite(cadence)
           !validInputs(distance, duration, cadence) ||
           !allPositive(distance, duration, cadence)
         )
@@ -213,43 +210,46 @@ class App {
     if (this.#CRUD === 'U') {
       this.#CRUD === 'C';
       const workoutToUpdate = this.#workouts.at(this.#crudworkout.index);
+      [lat, lng] = this.#crudworkout.coords;
       if (type === 'running') {
-        [lat, lng] = this.#crudworkout.coords;
         // reading current workout
 
         const cadence = +inputCadence.value;
-        console.log(
-          'running',
-          this.#crudworkout.index,
-          [lat, lng],
-          distance,
-          duration,
-          cadence
-        );
         if (type === this.#crudworkout.type) {
           workoutToUpdate.distance = distance;
           workoutToUpdate.duration = duration;
           workoutToUpdate.cadence = cadence;
         } else {
-          // TODO: case 2 -> create a new cycling workout and replace it with the current workout
+          // TODO: case 2 -> still must refresh marker popup
+          const cadence = +inputCadence.value;
+          // Check if data is valid
+          if (
+            !validInputs(distance, duration, cadence) ||
+            !allPositive(distance, duration, cadence)
+          )
+            return alert('Inputs have to be positive numbers!');
+
+          workout = new Running([lat, lng], distance, duration, cadence);
+          this.#workouts.splice(this.#crudworkout.index, 1, workout);
         }
-      }
-      if (type === 'cycling') {
+      } else if (type === 'cycling') {
         const elevation = +inputElevation.value;
-        console.log(
-          'cycling',
-          workoutToUpdate.index,
-          [lat, lng],
-          distance,
-          duration,
-          elevation
-        );
         if (type === workoutToUpdate.type) {
           workoutToUpdate.distance = distance;
           workoutToUpdate.duration = duration;
           workoutToUpdate.elevationGain = elevation;
         } else {
-          // TODO: case 3 -> create a new running workout and replace it with the current workout
+          // TODO: case 3 -> still must refresh marker popup
+          const elevation = +inputElevation.value;
+
+          if (
+            !validInputs(distance, duration, elevation) ||
+            !allPositive(distance, duration)
+          )
+            return alert('Inputs have to be positive numbers!');
+
+          workout = new Cycling([lat, lng], distance, duration, elevation);
+          this.#workouts.splice(this.#crudworkout.index, 1, workout);
         }
       }
       console.log(this.#crudworkout);
