@@ -62,10 +62,6 @@ class Cycling extends Workout {
   }
 }
 
-// const run1 = new Running([39, -12], 5.2, 24, 178);
-// const cycling1 = new Cycling([39, -12], 27, 95, 523);
-// console.log(run1, cycling1);
-
 ///////////////////////////////////////
 // APPLICATION ARCHITECTURE
 const form = document.querySelector('.form');
@@ -110,7 +106,6 @@ class App {
   _loadMap(position) {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
-    // console.log(`https://www.google.pt/maps/@${latitude},${longitude}`);
 
     const coords = [latitude, longitude];
 
@@ -168,8 +163,8 @@ class App {
     const type = inputType.value;
     const distance = +inputDistance.value;
     const duration = +inputDuration.value;
-    const { lat, lng } =
-      this.#CRUD === 'C' ? this.#mapEvent.latlng : this.#crudworkout.coords;
+    let lat = this.#mapEvent ? this.#mapEvent.latlng.lat : undefined;
+    let lng = this.#mapEvent ? this.#mapEvent.latlng.lng : undefined;
     let workout;
 
     if (this.#CRUD === 'C') {
@@ -212,23 +207,42 @@ class App {
       // Render workout on list
       this._renderWorkout(workout);
 
-      // Hide form + clear input fields
-      this._hideForm();
-
       // Set local storage to all workouts
       this._setLocalStorage();
     }
     if (this.#CRUD === 'U') {
       this.#CRUD === 'C';
       if (type === 'running') {
+        [lat, lng] = this.#crudworkout.coords;
+        // reading current workout
+        const workoutToUpdate = this.#workouts.at(this.#crudworkout.index);
+
         const cadence = +inputCadence.value;
-        console.log('running', [lat, lng], distance, duration, cadence);
+        console.log(
+          'running',
+          this.#crudworkout.index,
+          [lat, lng],
+          distance,
+          duration,
+          cadence
+        );
       }
       if (type === 'cycling') {
         const elevation = +inputElevation.value;
-        console.log('cycling', [lat, lng], distance, duration, elevation);
+        console.log(
+          'cycling',
+          this.#crudworkout.index,
+          [lat, lng],
+          distance,
+          duration,
+          elevation
+        );
       }
+      console.log(this.#crudworkout);
     }
+
+    // Hide form + clear input fields
+    this._hideForm();
   }
 
   _renderWorkoutMarker(workout) {
@@ -303,8 +317,6 @@ class App {
   }
 
   _deleteWorkoutByid(e) {
-    console.log('workouts->', this.#workouts);
-
     const idl = e.target.dataset.id.slice(1);
     if (confirm('Are you sure about delete it!') == true) {
       // this.#workouts = this.#workouts.filter(val => val.id != idl);
@@ -315,13 +327,8 @@ class App {
       );
       this.#workouts.splice(indexDelete, 1);
 
-      console.log('workouts->', this.#workouts);
-      console.log('marker->', this.#markers);
-
       this.#map.removeLayer(this.#markers.at(indexDelete).marker);
       this.#markers.splice(indexDelete, 1);
-
-      console.log('marker->', this.#markers);
 
       this._refreshWorouts();
     } else {
@@ -345,10 +352,29 @@ class App {
     inputDuration.value = this.#crudworkout.duration + '';
     inputType.value = this.#crudworkout.type;
 
+    // hide both fields before choosing one
+    if (
+      !inputElevation
+        .closest('.form__row')
+        .classList.contains('form__row--hidden')
+    )
+      inputElevation.closest('.form__row').classList.add('form__row--hidden');
+
+    if (
+      !inputCadence
+        .closest('.form__row')
+        .classList.contains('form__row--hidden')
+    )
+      inputCadence.closest('.form__row').classList.add('form__row--hidden');
+
     if (this.#crudworkout.type === 'running') {
+      inputCadence.closest('.form__row').classList.remove('form__row--hidden');
       inputCadence.value = this.#crudworkout.cadence + '';
     } else if (this.#crudworkout.type === 'cycling') {
-      inputElevation.value = this.#crudworkout.elevation + '';
+      inputElevation
+        .closest('.form__row')
+        .classList.remove('form__row--hidden');
+      inputElevation.value = this.#crudworkout.elevationGain + '';
     }
   }
 
@@ -356,6 +382,7 @@ class App {
     let btns = document.querySelectorAll('.form__btn__CRUD');
     btns.forEach(btn => btn.remove());
   }
+
   _addWorkoutMenu(workoutEl, e) {
     this._removeWorkoutMenu();
     const html = `<button title="Delete" type="button" class='form__btn__CRUD btn__Wdelete' data-id="D${workoutEl.dataset.id}">⛔</button>
@@ -419,18 +446,7 @@ class App {
     // First lets remove all the workouts
     let workos = document.querySelectorAll('.workout');
     workos.forEach(wo => wo.remove());
-    //TODO: remove al markers from the map view
-
-    console.log('refresh->', this.#map.getContainer());
-    console.log(L.markerClusterGroup);
-    // this.#map
-    //   .getContainer()
-    //   .querySelectorAll('.leaflet-marker-icon')
-    //   .forEach(mark => mark.remove());
-
     this._getLocalStorage();
-
-    // <img src="https://unpkg.com/leaflet@1.6.0/dist/images/marker-icon.png" class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" alt="" tabindex="0" style="margin-left: -12px; margin-top: -41px; width: 25px; height: 41px; transform: translate3d(644px, -170px, 0px); z-index: -170;"></img>
   }
 }
 
