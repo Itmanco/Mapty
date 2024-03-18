@@ -209,7 +209,8 @@ class App {
     }
     if (this.#CRUD === 'U') {
       this.#CRUD === 'C';
-      const workoutToUpdate = this.#workouts.at(this.#crudworkout.index);
+      const updateIndex = this.#crudworkout.index;
+      const workoutToUpdate = this.#workouts.at(updateIndex);
       [lat, lng] = this.#crudworkout.coords;
       if (type === 'running') {
         // reading current workout
@@ -230,7 +231,10 @@ class App {
             return alert('Inputs have to be positive numbers!');
 
           workout = new Running([lat, lng], distance, duration, cadence);
-          this.#workouts.splice(this.#crudworkout.index, 1, workout);
+          this.#workouts.splice(updateIndex, 1, workout);
+          // Refresh marker
+          this._removeMarker(updateIndex);
+          this._renderWorkoutMarker(workout);
         }
       } else if (type === 'cycling') {
         const elevation = +inputElevation.value;
@@ -239,7 +243,6 @@ class App {
           workoutToUpdate.duration = duration;
           workoutToUpdate.elevationGain = elevation;
         } else {
-          // TODO: case 3 -> still must refresh marker popup
           const elevation = +inputElevation.value;
 
           if (
@@ -249,7 +252,10 @@ class App {
             return alert('Inputs have to be positive numbers!');
 
           workout = new Cycling([lat, lng], distance, duration, elevation);
-          this.#workouts.splice(this.#crudworkout.index, 1, workout);
+          this.#workouts.splice(updateIndex, 1, workout);
+          // Refresh marker
+          this._removeMarker(updateIndex);
+          this._renderWorkoutMarker(workout);
         }
       }
       console.log(this.#crudworkout);
@@ -332,19 +338,22 @@ class App {
     form.insertAdjacentHTML('afterend', html);
   }
 
+  _removeMarker(indexDelete) {
+    this.#map.removeLayer(this.#markers.at(indexDelete).marker);
+    this.#markers.splice(indexDelete, 1);
+  }
+
   _deleteWorkoutByid(e) {
     const idl = e.target.dataset.id.slice(1);
     if (confirm('Are you sure about delete it!') == true) {
-      // this.#workouts = this.#workouts.filter(val => val.id != idl);
       const workoutToDelete = this.#workouts.find(el => el.id === idl);
-      // workoutToDelete.marker.remove(this.#map);
+
       const indexDelete = this.#workouts.findIndex(
         el => el.id === workoutToDelete.id
       );
       this.#workouts.splice(indexDelete, 1);
 
-      this.#map.removeLayer(this.#markers.at(indexDelete).marker);
-      this.#markers.splice(indexDelete, 1);
+      this._removeMarker(indexDelete);
 
       this._refreshWorouts();
     } else {
@@ -353,6 +362,10 @@ class App {
     return this.#workouts;
   }
 
+  /**
+   * capture the information into #crudworkout from the element instance that raised the event
+   * @param {Event} e - Event rised by the update button
+   */
   _updateWorkoutByid(e) {
     const lid = e.target.dataset.id.slice(1);
     this.#crudworkout = this.#workouts.find(val => val.id === lid);
@@ -462,6 +475,7 @@ class App {
     // First lets remove all the workouts
     let workos = document.querySelectorAll('.workout');
     workos.forEach(wo => wo.remove());
+
     this._getLocalStorage();
   }
 }
