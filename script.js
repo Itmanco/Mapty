@@ -258,8 +258,7 @@ class App {
           this._renderWorkoutMarker(workout);
         }
       }
-      console.log(this.#crudworkout);
-      console.log(this.#workouts);
+
       this._refreshWorouts();
     }
 
